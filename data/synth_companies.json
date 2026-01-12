@@ -1,0 +1,102 @@
+[
+  {
+    "name": "Tesla",
+    "industry": "Automotive",
+    "headquarters": "Austin, TX",
+    "website": "https://www.tesla.com",
+    "products": ["EVs", "Energy storage", "Solar"],
+    "partnerships": ["Panasonic"],
+    "risk_category": "medium",
+    "sensitive_projects": ["Project Phoenix"]
+  },
+  {
+    "name": "OpenAI",
+    "industry": "AI Research",
+    "headquarters": "San Francisco, CA",
+    "website": "https://openai.com",
+    "products": ["API", "ChatGPT", "Enterprise AI tools"],
+    "partnerships": ["Microsoft"],
+    "risk_category": "low",
+    "sensitive_projects": ["GPT 6"]
+  },
+  {
+    "name": "BlueOrbit Analytics",
+    "industry": "Data Analytics",
+    "headquarters": "New York, NY",
+    "website": "https://blueorbit.example.com",
+    "products": ["Market intelligence platform", "Predictive dashboards"],
+    "partnerships": ["Snowflake"],
+    "risk_category": "medium",
+    "sensitive_projects": ["Internal-Only Alpha"]
+  },
+  {
+    "name": "Helios Energy",
+    "industry": "Renewable Energy",
+    "headquarters": "Berlin, Germany",
+    "website": "https://helios-energy.example.com",
+    "products": ["Solar panels", "Grid optimization software"],
+    "partnerships": ["Siemens Energy"],
+    "risk_category": "low",
+    "sensitive_projects": []
+  },
+  {
+    "name": "NovaHealth Systems",
+    "industry": "Healthcare Technology",
+    "headquarters": "Boston, MA",
+    "website": "https://novahealth.example.com",
+    "products": ["EHR platform", "AI diagnostics"],
+    "partnerships": ["Mayo Clinic"],
+    "risk_category": "high",
+    "sensitive_projects": ["Redwood Initiative"]
+  },
+  {
+    "name": "Aquila Defense",
+    "industry": "Aerospace & Defense",
+    "headquarters": "Arlington, VA",
+    "website": "https://aquila-defense.example.com",
+    "products": ["Autonomous drones", "Command software"],
+    "partnerships": ["US DoD"],
+    "risk_category": "high",
+    "sensitive_projects": ["Black Sky Program"]
+  },
+  {
+    "name": "FinEdge Capital",
+    "industry": "Financial Services",
+    "headquarters": "London, UK",
+    "website": "https://finedge.example.com",
+    "products": ["Algorithmic trading", "Risk analytics"],
+    "partnerships": ["Goldman Sachs"],
+    "risk_category": "medium",
+    "sensitive_projects": ["ShadowBook"]
+  },
+  {
+    "name": "UrbanMove",
+    "industry": "Mobility",
+    "headquarters": "Paris, France",
+    "website": "https://urbanmove.example.com",
+    "products": ["Ride-sharing app", "Fleet optimization"],
+    "partnerships": ["Renault"],
+    "risk_category": "low",
+    "sensitive_projects": []
+  },
+  {
+    "name": "CloudNest",
+    "industry": "Cloud Infrastructure",
+    "headquarters": "Dublin, Ireland",
+    "website": "https://cloudnest.example.com",
+    "products": ["Cloud hosting", "Managed Kubernetes"],
+    "partnerships": ["AWS"],
+    "risk_category": "medium",
+    "sensitive_projects": ["Project Atlas"]
+  },
+  {
+    "name": "RetailMind",
+    "industry": "Retail Technology",
+    "headquarters": "Toronto, Canada",
+    "website": "https://retailmind.example.com",
+    "products": ["Demand forecasting", "Personalization engine"],
+    "partnerships": ["Shopify"],
+    "risk_category": "low",
+    "sensitive_projects": []
+  }
+]

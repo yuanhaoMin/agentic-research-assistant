@@ -1,0 +1,72 @@
+[
+  {
+    "id": "tesla_q3_internal",
+    "title": "Tesla_Internal_Q3_Notes.pdf",
+    "company": "Tesla",
+    "language_hint": "en",
+    "text": "Internal memo: Q3 delivery constraints impacted EU shipments. Battery supply stabilized in late quarter. Do not disclose Project Phoenix timeline or supplier negotiations."
+  },
+  {
+    "id": "openai_strategy_internal",
+    "title": "OpenAI_Internal_Strategy.pdf",
+    "company": "OpenAI",
+    "language_hint": "en",
+    "text": "Internal strategy summary: focus on enterprise adoption, model safety evaluations on GPT-6, and long-term research alignment. Partner agreements should not be shared publicly."
+  },
+  {
+    "id": "blueorbit_alpha_internal",
+    "title": "BlueOrbit_Alpha_Project_Notes.pdf",
+    "company": "BlueOrbit Analytics",
+    "language_hint": "en",
+    "text": "Internal document describing early-stage experimentation for Internal-Only Alpha. Early customer pilots revealed performance variability under high-load conditions."
+  },
+  {
+    "id": "helios_market_internal",
+    "title": "Helios_Energy_Internal_Market_Notes.pdf",
+    "company": "Helios Energy",
+    "language_hint": "en",
+    "text": "Internal market analysis: increased demand for distributed solar in EU regions. Policy incentives remain stable, and no confidential projects are referenced."
+  },
+  {
+    "id": "novahealth_redwood_internal",
+    "title": "NovaHealth_Redwood_Initiative.pdf",
+    "company": "NovaHealth Systems",
+    "language_hint": "en",
+    "text": "Confidential internal report on Redwood Initiative: AI-assisted diagnostics trials show promise but require regulatory review. Do not expose trial identifiers."
+  },
+  {
+    "id": "aquila_blacksky_internal",
+    "title": "Aquila_Black_Sky_Program.pdf",
+    "company": "Aquila Defense",
+    "language_hint": "en",
+    "text": "Internal defense briefing: Black Sky Program focuses on autonomous coordination systems. All technical specifications are classified and must be redacted externally."
+  },
+  {
+    "id": "finedge_shadowbook_internal",
+    "title": "FinEdge_ShadowBook_Notes.pdf",
+    "company": "FinEdge Capital",
+    "language_hint": "en",
+    "text": "Internal trading memo: ShadowBook simulations indicate reduced volatility exposure. Strategies and risk parameters are proprietary and confidential."
+  },
+  {
+    "id": "urbanmove_ops_internal",
+    "title": "UrbanMove_Operations_Internal.pdf",
+    "company": "UrbanMove",
+    "language_hint": "en",
+    "text": "Internal operations update: fleet utilization improved after routing algorithm update. No sensitive initiatives or codenames are included."
+  },
+  {
+    "id": "cloudnest_atlas_internal",
+    "title": "CloudNest_Project_Atlas.pdf",
+    "company": "CloudNest",
+    "language_hint": "en",
+    "text": "Internal architecture notes for Project Atlas: multi-region redundancy testing ongoing. Capacity benchmarks should not be disclosed publicly."
+  },
+  {
+    "id": "retailmind_internal_notes",
+    "title": "RetailMind_Internal_Planning.pdf",
+    "company": "RetailMind",
+    "language_hint": "en",
+    "text": "Internal planning document: roadmap prioritizes personalization accuracy improvements. No restricted project names are referenced."
+  }
+]

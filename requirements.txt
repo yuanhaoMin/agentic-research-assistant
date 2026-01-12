@@ -1,0 +1,7 @@
+beautifulsoup4
+jinja2
+openai
+pydantic
+python-dotenv
+requests
+streamlit
