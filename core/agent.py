@@ -3,7 +3,6 @@ import os
 from datetime import datetime
 from typing import Any, Dict, Callable, List, Optional
 
-
 from core.models import AgentPlan, ToolStep, TraceEvent, AgentRunResult
 from llm.base import BaseLLM
 from tools.company_db import get_company_info
@@ -67,9 +66,23 @@ class ResearchBriefingAgent:
             ToolStep(tool="mock_web_search", args={"company_name": company_name}),
             ToolStep(
                 tool="translate_document",
-                args={"document": "", "target_language": target_language},
+                args={
+                    "document": "",
+                    "target_language": target_language,
+                    "source": "internal",
+                    "mode": "plain",
+                },
             ),
             ToolStep(tool="generate_document", args={"content_dict": {}}),
+            ToolStep(
+                tool="translate_document",
+                args={
+                    "document": "",
+                    "target_language": target_language,
+                    "source": "final",
+                    "mode": "briefing",
+                },
+            ),
             ToolStep(tool="security_filter", args={"document": ""}),
         ]
         return AgentPlan(
@@ -82,13 +95,17 @@ class ResearchBriefingAgent:
             "Available tools:\n"
             "- get_company_info(company_name)\n"
             "- mock_web_search(company_name)\n"
-            "- translate_document(document, target_language)\n"
+            "- translate_document(document, target_language, source, mode)\n"
             "- generate_document(content_dict)\n"
             "- security_filter(document)\n\n"
             "Rules:\n"
             "1) Always include security_filter as the final step.\n"
-            "2) Use translate_document only for internal document text (may be empty).\n"
-            "3) generate_document should happen right before security_filter.\n"
+            "2) translate_document may be used for:\n"
+            '   - internal document translation (source="internal", mode="plain")\n'
+            '   - final briefing localization after generate_document (source="final", mode="briefing")\n'
+            "3) generate_document should happen right before either:\n"
+            '   - translate_document(source="final") if target_language is not English, otherwise\n'
+            "   - security_filter\n"
             "Return a JSON structure matching the schema."
         )
 
@@ -122,14 +139,19 @@ class ResearchBriefingAgent:
         steps = [s for s in steps if s.tool != "security_filter"]
         steps.append(ToolStep(tool="security_filter", args={"document": ""}))
 
-        # (B) if internal_doc exist: make sure translate_document before generate_document
+        # (B) if internal_doc exist: make sure translate_document(source=internal) before generate_document
         if (internal_document_text or "").strip():
             gen_idx = next(
                 (i for i, s in enumerate(steps) if s.tool == "generate_document"),
                 None,
             )
             trans_idx = next(
-                (i for i, s in enumerate(steps) if s.tool == "translate_document"),
+                (
+                    i
+                    for i, s in enumerate(steps)
+                    if s.tool == "translate_document"
+                    and (s.args or {}).get("source", "internal") != "final"
+                ),
                 None,
             )
 
@@ -142,12 +164,49 @@ class ResearchBriefingAgent:
                             args={
                                 "document": "",
                                 "target_language": plan.target_language,
+                                "source": "internal",
+                                "mode": "plain",
                             },
                         ),
                     )
                 elif trans_idx > gen_idx:
                     trans_step = steps.pop(trans_idx)
                     steps.insert(gen_idx, trans_step)
+
+        # (C) If target_language != en: ensure translate_document(source=final, mode=briefing)
+        tl = (plan.target_language or "en").lower().strip()
+        if tl not in ("en", "english"):
+            has_final_translate = any(
+                s.tool == "translate_document"
+                and (s.args or {}).get("source") == "final"
+                for s in steps
+            )
+            if not has_final_translate:
+                gen_idx = next(
+                    (i for i, s in enumerate(steps) if s.tool == "generate_document"),
+                    None,
+                )
+                sec_idx = next(
+                    (i for i, s in enumerate(steps) if s.tool == "security_filter"),
+                    None,
+                )
+
+                insert_at = sec_idx if sec_idx is not None else len(steps)
+                if gen_idx is not None:
+                    insert_at = min(insert_at, gen_idx + 1)
+
+                steps.insert(
+                    insert_at,
+                    ToolStep(
+                        tool="translate_document",
+                        args={
+                            "document": "",
+                            "target_language": plan.target_language,
+                            "source": "final",
+                            "mode": "briefing",
+                        },
+                    ),
+                )
 
         plan.steps = steps
         return plan
@@ -199,8 +258,15 @@ class ResearchBriefingAgent:
                 args.setdefault("company_name", ctx["company_name"])
 
             elif tool_name == "translate_document":
-                args["document"] = ctx.get("internal_document_text", "") or ""
+                source = (args.get("source") or "internal").lower().strip()
+                if source == "final":
+                    args["document"] = draft_document or ""
+                    args.setdefault("mode", "briefing")
+                else:
+                    args["document"] = ctx.get("internal_document_text", "") or ""
+                    args.setdefault("mode", "plain")
                 args["target_language"] = ctx.get("target_language", "en")
+                args["source"] = source
 
             elif tool_name == "generate_document":
                 built_cd = self._build_content_dict(ctx)
@@ -234,7 +300,12 @@ class ResearchBriefingAgent:
                     ctx["web_findings"] = out
 
                 elif tool_name == "translate_document":
-                    ctx["translated_internal_doc"] = out or ""
+                    source = (args.get("source") or "internal").lower().strip()
+                    if source == "final":
+                        draft_document = out or ""
+                        ctx["draft_document"] = draft_document
+                    else:
+                        ctx["translated_internal_doc"] = out or ""
 
                 elif tool_name == "generate_document":
                     draft_document = out or ""

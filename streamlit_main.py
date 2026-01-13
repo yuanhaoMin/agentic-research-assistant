@@ -8,9 +8,6 @@ from llm.open_source_client import FriendliLLM
 from llm.openai_client import OpenAILLM
 
 
-# -----------------------
-# Shared helpers
-# -----------------------
 def build_llm(provider: str):
     provider = (provider or "").lower().strip()
 
@@ -42,6 +39,35 @@ def find_default_index(options, predicate, fallback: int = 0) -> int:
     return fallback
 
 
+def _extract_target_language_from_plan(res) -> str:
+    # res.plan.target_language should exist; fallback to "en"
+    try:
+        tl = (res.plan.target_language or "en").strip()
+        return tl
+    except Exception:
+        return "en"
+
+
+def get_sensitive_terms_for_company(companies: list, company_name: str) -> list[str]:
+    """
+    Return sensitive terms (sensitive_projects) for the selected company from synth_companies.json.
+    Deduplicate while preserving order.
+    """
+    name = (company_name or "").strip().lower()
+    for c in companies or []:
+        if (c.get("name") or "").strip().lower() == name:
+            terms = c.get("sensitive_projects") or []
+            seen = set()
+            out = []
+            for t in terms:
+                t = (t or "").strip()
+                if t and t not in seen:
+                    seen.add(t)
+                    out.append(t)
+            return out
+    return []
+
+
 def main():
     load_dotenv()
 
@@ -50,7 +76,7 @@ def main():
     )
     st.title("🧪 Research Assistant (Agentic) — Company Briefing Generator")
 
-    # Load assets
+    # Load mock data
     companies = load_json("data/synth_companies.json")
     internal_docs_all = load_json("data/internal_docs.json")
 
@@ -59,12 +85,8 @@ def main():
         "OpenAI",
     ]
 
-    # ---- Layout: two main columns (no sidebar) ----
     left, right = st.columns([1.6, 1.0], gap="large")
 
-    # -----------------------
-    # Left: Instruction + Internal doc
-    # -----------------------
     with left:
         st.subheader("1) Instruction")
         default_instruction = "Generate a company briefing on Tesla in German"
@@ -74,9 +96,8 @@ def main():
             height=90,
         )
 
-        st.subheader("2) Internal document (shown as PDF, backend uses text)")
+        st.subheader("2) Internal document")
 
-        # ✅ Default company -> Tesla
         default_company_idx = find_default_index(
             company_names,
             lambda name: (name or "").strip().lower() == "tesla",
@@ -88,23 +109,18 @@ def main():
             index=default_company_idx,
         )
 
-        # Filter docs by company
         def same_company(doc):
             return (doc.get("company") or "").strip().lower() == (
                 selected_company or ""
             ).strip().lower()
 
         filtered_docs = [d for d in internal_docs_all if same_company(d)]
-        # if none matched, fall back to all docs
         if not filtered_docs:
             filtered_docs = internal_docs_all
 
-        # We'll keep internal key as doc["id"] but display only title (no id in UI)
-        # Use objects in selectbox with format_func
         def fmt_doc(d):
             return d.get("title", "Internal.pdf")
 
-        # ✅ Default doc -> Tesla_Internal_Q3_Notes.pdf (by id preferred; fallback by title)
         default_doc_idx = find_default_index(
             filtered_docs,
             lambda d: (d.get("id") == "tesla_q3_internal")
@@ -127,7 +143,6 @@ def main():
 
         internal_text = (chosen_doc or {}).get("text", "") if chosen_doc else ""
 
-        # Show PDF icon card (no id)
         if chosen_doc:
             st.markdown(
                 f"""
@@ -145,19 +160,15 @@ def main():
             )
 
             with st.expander(
-                "Preview internal text (what backend will send to translate_document)",
+                "Preview internal text",
                 expanded=False,
             ):
                 st.code(internal_text, language="text")
 
-    # -----------------------
-    # Right: Settings + Run (not empty anymore)
-    # -----------------------
     with right:
         st.subheader("Settings & Run")
 
         with st.container(border=True):
-            # ✅ Default opensource
             provider_label_to_value = {
                 "opensource (Magistral-Small-2506)": "friendli",
                 "openai (GPT-4.1)": "openai",
@@ -190,26 +201,21 @@ def main():
                 language="text",
             )
 
-        st.write("")  # spacing
+        st.write("")
 
         run_btn = st.button("🚀 Run Agent", type="primary", use_container_width=True)
 
-        # A small helper panel so the right side isn't just run button
         with st.expander("Quick sanity checks", expanded=False):
             st.write(f"**Selected company:** {selected_company}")
             st.write(f"**Selected model:** {llm_provider_label}")
             st.write(f"**Internal doc:** {(chosen_doc or {}).get('title','(none)')}")
             st.write(f"**Internal doc length:** {len(internal_text or '')} chars")
+            st.write(
+                f"**Sensitive terms (from JSON):** {get_sensitive_terms_for_company(companies, selected_company)}"
+            )
 
-    # -----------------------
-    # Execute + Results (full width, below)
-    # -----------------------
     if run_btn:
-        sensitive_terms = [
-            "Project Phoenix",
-            "Internal-Only Alpha",
-            "Redwood Initiative",
-        ]
+        sensitive_terms = get_sensitive_terms_for_company(companies, selected_company)
 
         llm = build_llm(provider_label_to_value[llm_provider_label])
 
@@ -230,11 +236,46 @@ def main():
 
         st.success("Done!")
 
+        translated_final_from_trace = ""
+        try:
+            for ev in reversed(res.trace or []):
+                if ev.event_type != "tool_result":
+                    continue
+                payload = ev.payload or {}
+                if payload.get("tool") != "translate_document":
+                    continue
+
+                step_idx = payload.get("step")
+                call_ev = None
+                for ev2 in reversed(res.trace or []):
+                    if (
+                        ev2.event_type == "tool_call"
+                        and (ev2.payload or {}).get("step") == step_idx
+                    ):
+                        call_ev = ev2
+                        break
+
+                if call_ev:
+                    call_args = (call_ev.payload or {}).get("args", {}) or {}
+                    if (call_args.get("source") or "").lower().strip() == "final":
+                        translated_final_from_trace = (
+                            payload.get("output_preview", "") or ""
+                        )
+                        break
+        except Exception:
+            translated_final_from_trace = ""
+
+        target_language = _extract_target_language_from_plan(res)
+
         tab1, tab2, tab3 = st.tabs(
             ["📄 Final Document", "🧾 Security Filtering", "🧠 Trace (preview)"]
         )
 
         with tab1:
+            st.caption(
+                f"Showing **final (after security_filter)**. "
+                f"Target language from plan: **{target_language}**."
+            )
             st.markdown(res.final_document)
 
         with tab2:

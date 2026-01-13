@@ -105,11 +105,12 @@ class FriendliLLM(BaseLLM):
     def summarize(self, text: str, target_language: str, max_words: int = 180) -> str:
         instr = (
             "You are a precise analyst. Summarize the text for a company briefing. "
+            f"Write the summary in {target_language}. "
             f"Keep it under {max_words} words. Return only the summary."
         )
         return self._generate_text_impl(
             instructions=instr,
-            input_text=f"Language: {target_language}\n\nText:\n{text}",
+            input_text=f"Text:\n{text}",
             max_tokens=512,
             temperature=0.2,
         )
