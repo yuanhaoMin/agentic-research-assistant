@@ -1,5 +1,8 @@
+from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Type, TypeVar, List, Optional, Tuple
+
+T = TypeVar("T")
 
 
 class BaseLLM(ABC):

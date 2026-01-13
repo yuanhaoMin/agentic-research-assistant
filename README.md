@@ -5,7 +5,7 @@ This repository contains my submission for the Generative AI Scientist – Agent
 The goal of this project is to build a small agentic research assistant and, more importantly, to show how I would test and evaluate such a system in practice. The focus is on agent behavior, safety, and failure modes rather than on prompt tuning or UI polish.
 
 **Introduction video:** <Add later>  
-**Deployed Streamlit app:** <Add later>
+**Deployed Streamlit app:** https://agentic-research-assistant.streamlit.app/
 
 ![Screenshot](images/Screenshot.png)
 ---
