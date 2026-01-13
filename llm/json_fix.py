@@ -1,7 +1,10 @@
+from __future__ import annotations
 import json
 from typing import Any, Callable, Type, TypeVar
 
 from pydantic import ValidationError
+
+T = TypeVar("T")
 
 
 def strip_markdown_fences(text: str) -> str:

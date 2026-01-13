@@ -1,3 +1,4 @@
+from __future__ import annotations
 import os
 from typing import Any, Dict, Optional, Type, TypeVar, List, Tuple
 
@@ -6,6 +7,8 @@ from openai import OpenAI
 from core.models import RedactionResult
 from llm.base import BaseLLM
 from llm.json_fix import plan_with_json_retries
+
+T = TypeVar("T")
 
 
 class FriendliLLM(BaseLLM):

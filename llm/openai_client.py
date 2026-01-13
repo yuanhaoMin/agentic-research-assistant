@@ -1,3 +1,4 @@
+from __future__ import annotations
 import os
 from typing import Optional, Type, TypeVar, List, Tuple
 
@@ -9,6 +10,8 @@ from llm.json_fix import (
     plan_with_json_retries,
     read_output_text_from_response,
 )
+
+T = TypeVar("T")
 
 
 class OpenAILLM(BaseLLM):
